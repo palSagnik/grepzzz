@@ -189,15 +189,17 @@ func worker(files <-chan string, pattern []byte, results chan<- string, wg *sync
 			// checking for binary file type
 			// using healy's trick
 			if lineNumber == 1 {
-				isBinary = bytes.IndexByte(text, 0) != -1
+				if bytes.IndexByte(text, 0) != -1 {
+					isBinary = true
+				}
 			}
 			
 			if finder.next(text) != -1 {
 				if isBinary {
-					results <- fmt.Sprintf("Binary file match %s: %s", file, scanner.Text())
+					results <- fmt.Sprintf("Binary file %s matches\n", file)
 					break
 				} else {
-					results <- fmt.Sprintf("%s:%d %s", file, lineNumber, scanner.Text())
+					results <- fmt.Sprintf("%s:%d %s\n", file, lineNumber, scanner.Text())
 				}
 			}
 			lineNumber++
