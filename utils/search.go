@@ -185,9 +185,6 @@ func worker(files <-chan string, pattern []byte, results chan<- string, wg *sync
 
 		for scanner.Scan() {
 			text := scanner.Bytes()
-
-			// checking for binary file type
-			// using healy's trick
 			if lineNumber == 1 {
 				if bytes.IndexByte(text, 0) != -1 {
 					isBinary = true
