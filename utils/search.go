@@ -31,6 +31,7 @@ func ConcurrentGrep (pattern string, directory string, threads int) {
 			if err != nil {
 				return err
 			}
+			
 			if !info.IsDir() {
 				files <- path
 			}
@@ -180,10 +181,24 @@ func worker(files <-chan string, pattern []byte, results chan<- string, wg *sync
 
 		scanner := bufio.NewScanner(f)
 		lineNumber := 1
+		isBinary := false
+
 		for scanner.Scan() {
-			line := scanner.Bytes()
-			if finder.next(line) != -1 {
-				results <- fmt.Sprintf("%s:%d %s", file, lineNumber, scanner.Text())
+			text := scanner.Bytes()
+
+			// checking for binary file type
+			// using healy's trick
+			if lineNumber == 1 {
+				isBinary = bytes.IndexByte(text, 0) != -1
+			}
+			
+			if finder.next(text) != -1 {
+				if isBinary {
+					results <- fmt.Sprintf("Binary file match %s: %s", file, scanner.Text())
+					break
+				} else {
+					results <- fmt.Sprintf("%s:%d %s", file, lineNumber, scanner.Text())
+				}
 			}
 			lineNumber++
 		}
