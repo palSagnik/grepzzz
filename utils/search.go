@@ -44,10 +44,8 @@ func ConcurrentGrep (pattern string, directory string, threads int) {
 					if info.IsDir() {
 						// skip the entire directory
 						continue
-					} else {
-						// skip the hidden files
-						continue
-					}
+					} 
+					return nil
 				}
 			}
 			
