@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -30,6 +31,24 @@ func ConcurrentGrep (pattern string, directory string, threads int) {
 		err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
+			}
+
+			relPath, err := filepath.Rel(directory, path)
+			if err != nil {
+				return err
+			}
+			components := strings.Split(relPath, string(filepath.Separator))
+
+			for _, c := range components {
+				if strings.HasPrefix(c, ".") {
+					if info.IsDir() {
+						// skip the entire directory
+						continue
+					} else {
+						// skip the hidden files
+						continue
+					}
+				}
 			}
 			
 			if !info.IsDir() {
